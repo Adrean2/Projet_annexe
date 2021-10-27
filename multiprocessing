@@ -1,0 +1,45 @@
+import random
+import string
+import csv
+import time
+from pathlib import Path
+import multiprocessing as mp
+
+
+start_time = time.time()
+absolute_path = Path(__file__).absolute().parent
+lettres = string.ascii_letters + string.digits
+
+
+def random_lettre():
+    lettre = random.choice(lettres)
+    return str(lettre)
+
+
+def pseudo_func(liste_a_itérer):
+    pseudo = []
+    for _ in range(81):
+        pseudo.append(random_lettre())
+    return pseudo
+
+
+def write(liste_pseudo):
+    with open(absolute_path/"pseudo_multiprocess.csv", mode="w") as pseudo:
+        writer = csv.writer(pseudo)
+        for pseudos in liste_pseudo:
+            writer.writerow(pseudos)
+
+
+def main():
+
+    p = mp.Pool()
+    iteration = range(501)
+    result = p.map(pseudo_func, iteration)
+    p.close()
+    p.join()
+    write(result)
+    
+
+if __name__ == '__main__':
+    main()
+    print("--- %s seconds ---" % (time.time() - start_time))
