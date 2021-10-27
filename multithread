@@ -1,0 +1,53 @@
+import random
+import string
+import csv
+from pathlib import Path
+import time
+import concurrent.futures as cf
+
+# pool.map 
+# fonction conteneur
+# fonction liste - récupère les résultats
+# pool.map()
+
+
+start_time = time.time()
+absolute_path = Path(__file__).absolute().parent
+lettres = string.ascii_letters + string.digits
+
+
+def random_lettre():
+    lettre = random.choice(lettres)
+    return str(lettre)
+
+
+def pseudo():
+    pseudo = []
+    for _ in range(81):
+        pseudo.append(random_lettre())
+    return pseudo
+
+def liste_pseudo():
+    liste_pseudo = []
+    with cf.ThreadPoolExecutor() as executor:
+        results = [executor.submit(pseudo) for _ in range(501)]
+        for pseudos in cf.as_completed(results):
+            liste_pseudo.append(pseudos.result())
+    return liste_pseudo
+
+
+def write(liste_pseudo):
+    with open(absolute_path/"pseudo_multithread.csv", mode="w") as pseudo:
+        writer = csv.writer(pseudo)
+        for pseudos in liste_pseudo:
+            writer.writerow(pseudos)
+
+
+def main():
+    liste_pseudos = liste_pseudo()
+    write(liste_pseudos)
+
+
+if __name__ == '__main__':
+    main()
+    print("--- %s seconds ---" % (time.time() - start_time))
